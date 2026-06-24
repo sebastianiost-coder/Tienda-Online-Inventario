@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Runtime data
+server/uploads/
+*.log
+*.dump
+*.bak
+
+# Local agent/config files
+.opencode/
+opencode.json
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

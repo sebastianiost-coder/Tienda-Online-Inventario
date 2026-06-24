@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tienda_inventario_db_prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tienda_inventario}
+      POSTGRES_USER: ${POSTGRES_USER:-tienda_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_db_password}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tienda_user} -d ${POSTGRES_DB:-tienda_inventario}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./server
+    container_name: tienda_inventario_api_prod
+    environment:
+      NODE_ENV: production
+      PORT: 8088
+      DATABASE_URL: postgres://${POSTGRES_USER:-tienda_user}:${POSTGRES_PASSWORD:-change_me_db_password}@db:5432/${POSTGRES_DB:-tienda_inventario}
+      JWT_SECRET: ${JWT_SECRET:-change_me_jwt_secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: npm start
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: /api
+    container_name: tienda_inventario_web_prod
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data_prod:
