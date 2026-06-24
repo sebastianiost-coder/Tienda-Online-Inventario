@@ -47,12 +47,13 @@ docker compose down -v   # elimina datos locales
 4. Ejecutar:
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+cp .env.docker.example .env.docker
+docker compose -f docker-compose.prod.yml --env-file .env.docker up -d --build
 ```
 
-La configuracion productiva expone `web` en el puerto 80, sirve React como archivos estaticos y redirige `/api` hacia Express.
+La configuracion productiva usa Caddy como proxy interno, expone `${HTTP_PORT:-8087}` y redirige `/api` hacia Express. Para HTTPS publico, poner Caddy/Nginx externo, Nginx Proxy Manager o un balanceador delante de ese puerto.
 
-Para HTTPS, poner Caddy, Nginx Proxy Manager o un balanceador delante del puerto 80.
+Ver `DEPLOY_SERVER_54.md` para el procedimiento SSH/SCP y despliegue desde GitHub.
 
 ## Alcance Inicial
 

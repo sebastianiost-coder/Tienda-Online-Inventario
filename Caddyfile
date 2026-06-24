@@ -1,0 +1,15 @@
+(app_proxy) {
+  encode gzip
+
+  handle /api/* {
+    reverse_proxy api:8088
+  }
+
+  handle {
+    reverse_proxy web:80
+  }
+}
+
+http://:80 {
+  import app_proxy
+}
