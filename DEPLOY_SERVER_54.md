@@ -5,7 +5,7 @@ Guia basada en el patron usado en `CLUBES DEPORTIVOS DEMO`: Docker Compose con P
 ## Datos De Produccion
 
 - IP servidor 54: `54.210.207.92`
-- Dominio objetivo: `tiendaonlinemilanesas.tideapps.com`
+- Dominio objetivo: `tiendaonline.tideapps.com`
 - HTTP: `8091`
 - HTTPS/proxy externo: `8451`
 - Llave SSH local: `proyectos_2026.pem`
@@ -69,13 +69,13 @@ nano .env.docker
 Valores minimos a cambiar:
 
 ```env
-APP_HOST=tiendaonlinemilanesas.tideapps.com
+APP_HOST=tiendaonline.tideapps.com
 HTTP_PORT=8091
 HTTPS_PORT=8451
 POSTGRES_PASSWORD=<password_larga>
 DATABASE_URL=postgres://tienda_user:<password_larga>@db:5432/tienda_inventario
 JWT_SECRET=<secreto_largo_unico>
-CORS_ORIGIN=https://tiendaonlinemilanesas.tideapps.com,https://tiendaonlinemilanesas.tideapps.com:8451,http://tiendaonlinemilanesas.tideapps.com:8091
+CORS_ORIGIN=https://tiendaonline.tideapps.com,https://tiendaonline.tideapps.com:8451,http://tiendaonline.tideapps.com:8091
 VITE_API_URL=/api
 ```
 
@@ -91,8 +91,8 @@ Verificar:
 ```bash
 docker compose -f docker-compose.prod.yml --env-file .env.docker ps
 curl -s http://localhost:8091/api/health
-curl -s http://tiendaonlinemilanesas.tideapps.com:8091/api/health
-curl -k -s https://tiendaonlinemilanesas.tideapps.com:8451/api/health
+curl -s http://tiendaonline.tideapps.com:8091/api/health
+curl -k -s https://tiendaonline.tideapps.com:8451/api/health
 ```
 
 ## Despliegue Desde GitHub En Servidor
