@@ -153,10 +153,10 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100">
+    <main className="min-h-screen bg-[var(--plate-bg)] text-[var(--ink)]">
       <Header user={user} cartCount={cart.length} tab={tab} setTab={setTab} logout={logout} isStaff={isStaff} />
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {message && <div className="mb-5 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">{message}</div>}
+        {message && <div className="mb-5 rounded-2xl border border-[var(--sun)]/40 bg-[var(--sun-soft)] px-4 py-3 text-sm font-semibold text-[var(--ink)]">{message}</div>}
         {tab === "catalogo" && <Catalog products={products} categories={categories} search={search} setSearch={setSearch} category={category} setCategory={setCategory} addToCart={addToCart} />}
         {tab === "carrito" && <Cart cart={cart} setCart={setCart} total={cartTotal} user={user} placeOrder={placeOrder} />}
         {tab === "login" && <Auth api={api} login={login} />}
@@ -172,11 +172,14 @@ function App() {
 function Header({ user, cartCount, tab, setTab, logout, isStaff }: { user: User | null; cartCount: number; tab: string; setTab: (tab: string) => void; logout: () => void; isStaff: boolean }) {
   const nav = ["catalogo", "carrito", ...(user ? ["pedidos"] : ["login"]), ...(isStaff ? ["inventario", "productos", "reportes"] : [])];
   return (
-    <header className="border-b border-white/10 bg-black/30 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-[var(--plate-line)] bg-white/85 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <div>
-          <p className="text-xs uppercase tracking-[0.4em] text-red-300">Milanesas & Carnes</p>
-          <h1 className="text-2xl font-black sm:text-3xl">Tienda Online + Inventario</h1>
+        <div className="flex items-center gap-3">
+          <div className="logo-mark" aria-hidden="true"><span></span></div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.32em] text-[var(--aqua)]">Hoy Milanesas</p>
+            <h1 className="text-2xl font-black sm:text-3xl">Tienda Online</h1>
+          </div>
         </div>
         <nav className="flex flex-wrap gap-2">
           {nav.map((item) => <button className={tab === item ? "nav-active" : "nav"} key={item} onClick={() => setTab(item)}>{item}{item === "carrito" ? ` (${cartCount})` : ""}</button>)}
@@ -202,11 +205,11 @@ function Catalog({ products, categories, search, setSearch, category, setCategor
   }
 
   return <div className="space-y-6">
-    <section className="rounded-[2rem] bg-gradient-to-br from-red-950 via-stone-900 to-amber-950 p-8 shadow-2xl shadow-red-950/30">
+    <section className="hero-card rounded-[2rem] p-8 shadow-2xl shadow-orange-200/50">
       <div className="max-w-3xl space-y-4">
-        <span className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold uppercase tracking-widest text-white">Venta directa</span>
-        <h2 className="text-4xl font-black sm:text-6xl">Catalogo fresco con stock en tiempo real</h2>
-        <p className="text-lg text-stone-300">Compra milanesas, hamburguesas, cortes y embutidos. El sistema bloquea ventas sin stock y registra consumo automaticamente.</p>
+        <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-black uppercase tracking-widest text-[var(--tomato)] ring-1 ring-[var(--sun)]/40">Venta directa</span>
+        <h2 className="text-4xl font-black leading-tight sm:text-6xl">Milanesas listas para hoy</h2>
+        <p className="text-lg font-medium text-orange-950/75">Compra milanesas, hamburguesas, cortes y embutidos con stock en tiempo real. El sistema reserva el consumo al confirmar tu pedido.</p>
       </div>
     </section>
     <div className="grid gap-3 md:grid-cols-[1fr_260px]">
@@ -221,14 +224,14 @@ function Catalog({ products, categories, search, setSearch, category, setCategor
         <img className="h-44 w-full object-cover" src={product.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80"} alt={product.name} />
         <div className="space-y-3 p-4">
           <div className="flex items-center justify-between gap-3">
-            <button className="badge hover:bg-red-400/20" onClick={(event) => { event.stopPropagation(); setCategory(product.category_name); }}>{product.category_name}</button>
+            <button className="badge hover:bg-[var(--sun-soft)]" onClick={(event) => { event.stopPropagation(); setCategory(product.category_name); }}>{product.category_name}</button>
             <StockBadge status={product.stock_status} />
           </div>
           <h3 className="text-lg font-bold">{product.name}</h3>
-          <p className="min-h-12 text-sm text-stone-400">{product.description}</p>
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-200">Ver detalle de compra</p>
+          <p className="min-h-12 text-sm font-medium text-[var(--muted)]">{product.description}</p>
+          <p className="text-xs font-black uppercase tracking-widest text-[var(--aqua)]">Ver detalle de compra</p>
           <div className="flex items-end justify-between">
-            <div><p className="text-2xl font-black text-red-200">{money.format(product.price)}</p><p className="text-xs text-stone-500">Stock: {product.stock}</p></div>
+            <div><p className="text-2xl font-black text-[var(--tomato)]">{money.format(product.price)}</p><p className="text-xs font-semibold text-[var(--muted)]">Stock: {product.stock}</p></div>
             <button className="btn" disabled={product.stock <= 0} onClick={(event) => { event.stopPropagation(); addToCart(product); }}>Agregar</button>
           </div>
         </div>
@@ -239,19 +242,19 @@ function Catalog({ products, categories, search, setSearch, category, setCategor
 }
 
 function ProductDetailModal({ product, close, addToCart }: { product: Product; close: () => void; addToCart: (product: Product) => void }) {
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="product-detail-title" onClick={close}>
-    <section className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-white/15 bg-stone-950 shadow-2xl shadow-red-950/40" onClick={(event) => event.stopPropagation()}>
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-orange-950/45 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="product-detail-title" onClick={close}>
+    <section className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-[var(--plate-line)] bg-white shadow-2xl shadow-orange-300/60" onClick={(event) => event.stopPropagation()}>
       <div className="grid md:grid-cols-[1.1fr_0.9fr]">
         <img className="h-72 w-full object-cover md:h-full" src={product.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80"} alt={product.name} />
         <div className="space-y-5 p-6 sm:p-8">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-3">
               <span className="badge">{product.category_name}</span>
-              <h2 id="product-detail-title" className="text-3xl font-black text-white">{product.name}</h2>
+              <h2 id="product-detail-title" className="text-3xl font-black text-[var(--ink)]">{product.name}</h2>
             </div>
             <button className="btn-secondary" onClick={close} aria-label="Cerrar detalle">Cerrar</button>
           </div>
-          <p className="text-stone-300">{product.description}</p>
+          <p className="font-medium text-[var(--muted)]">{product.description}</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <DetailItem label="Codigo" value={product.code} />
             <DetailItem label="Categoria" value={product.category_name} />
@@ -260,7 +263,7 @@ function ProductDetailModal({ product, close, addToCart }: { product: Product; c
             <DetailItem label="Stock minimo" value={`${product.min_stock} unidades`} />
             <DetailItem label="Estado" value={product.stock_status.replace("_", " ")} />
           </div>
-          <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-amber-100">
+          <div className="rounded-2xl border border-[var(--sun)]/30 bg-[var(--sun-soft)] p-4 text-sm font-semibold text-orange-950/80">
             Estas agregando este producto al carrito. El stock se descuenta solo cuando confirmas el pedido.
           </div>
           <button className="btn w-full" disabled={product.stock <= 0} onClick={() => addToCart(product)}>{product.stock <= 0 ? "Producto agotado" : "Agregar al carrito"}</button>
@@ -271,9 +274,9 @@ function ProductDetailModal({ product, close, addToCart }: { product: Product; c
 }
 
 function DetailItem({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
-  return <div className="rounded-2xl bg-white/5 p-4">
-    <p className="text-xs font-bold uppercase tracking-widest text-stone-500">{label}</p>
-    <p className={highlight ? "mt-1 text-2xl font-black text-red-200" : "mt-1 font-bold text-stone-100"}>{value}</p>
+  return <div className="rounded-2xl bg-orange-50 p-4 ring-1 ring-orange-100">
+    <p className="text-xs font-bold uppercase tracking-widest text-[var(--muted)]">{label}</p>
+    <p className={highlight ? "mt-1 text-2xl font-black text-[var(--tomato)]" : "mt-1 font-bold text-[var(--ink)]"}>{value}</p>
   </div>;
 }
 
@@ -281,9 +284,9 @@ function Cart({ cart, setCart, total, user, placeOrder }: { cart: CartItem[]; se
   return <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
     <section className="card p-5">
       <h2 className="section-title">Carrito</h2>
-      {cart.length === 0 ? <p className="text-stone-400">Tu carrito esta vacio.</p> : <div className="space-y-3">
-        {cart.map((item) => <div className="flex flex-col gap-3 rounded-2xl bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between" key={item.product.id}>
-          <div><p className="font-bold">{item.product.name}</p><p className="text-sm text-stone-400">{money.format(item.product.price)} c/u</p></div>
+      {cart.length === 0 ? <p className="text-[var(--muted)]">Tu carrito esta vacio.</p> : <div className="space-y-3">
+        {cart.map((item) => <div className="flex flex-col gap-3 rounded-2xl bg-orange-50 p-4 ring-1 ring-orange-100 sm:flex-row sm:items-center sm:justify-between" key={item.product.id}>
+          <div><p className="font-bold">{item.product.name}</p><p className="text-sm font-medium text-[var(--muted)]">{money.format(item.product.price)} c/u</p></div>
           <div className="flex items-center gap-3">
             <input className="input w-24" type="number" min="1" max={item.product.stock} value={item.quantity} onChange={(event) => setCart((current) => current.map((row) => row.product.id === item.product.id ? { ...row, quantity: Number(event.target.value) } : row))} />
             <button className="btn-secondary" onClick={() => setCart((current) => current.filter((row) => row.product.id !== item.product.id))}>Quitar</button>
@@ -299,7 +302,7 @@ function Cart({ cart, setCart, total, user, placeOrder }: { cart: CartItem[]; se
       <select className="input" name="deliveryMethod"><option value="retiro">Retiro en tienda</option><option value="delivery">Delivery</option></select>
       <select className="input" name="paymentMethod"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="mercadopago">MercadoPago</option></select>
       <textarea className="input" name="notes" placeholder="Notas del pedido" />
-      <div className="flex items-center justify-between border-t border-white/10 pt-4"><span>Total</span><strong className="text-3xl text-red-200">{money.format(total)}</strong></div>
+      <div className="flex items-center justify-between border-t border-orange-100 pt-4"><span>Total</span><strong className="text-3xl text-[var(--tomato)]">{money.format(total)}</strong></div>
       <button className="btn w-full" disabled={cart.length === 0}>Crear pedido</button>
     </form>
   </div>;
@@ -317,18 +320,18 @@ function Auth({ api, login }: { api: <T>(path: string, options?: RequestInit) =>
     <input className="input" name="email" defaultValue="admin@tienda.local" type="email" required />
     <input className="input" name="password" defaultValue="admin123" type="password" required />
     <button className="btn w-full">Iniciar sesion</button>
-    <p className="text-sm text-stone-400">Demo: admin@tienda.local / admin123, vendedor@tienda.local / vendedor123, cliente@tienda.local / cliente123</p>
+    <p className="text-sm font-medium text-[var(--muted)]">Demo: admin@tienda.local / admin123, vendedor@tienda.local / vendedor123, cliente@tienda.local / cliente123</p>
   </form>;
 }
 
 function Orders({ orders, token, isStaff, api, reload }: { orders: Order[]; token: string; isStaff: boolean; api: <T>(path: string, options?: RequestInit) => Promise<T>; reload: () => Promise<void> }) {
-  if (!token) return <p className="text-stone-400">Inicia sesion para ver pedidos.</p>;
+  if (!token) return <p className="text-[var(--muted)]">Inicia sesion para ver pedidos.</p>;
   async function setStatus(id: string, status: string) {
     await api(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
     await reload();
   }
   return <section className="space-y-4"><h2 className="section-title">Pedidos</h2>{orders.map((order) => <article className="card p-5" key={order.id}>
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div><p className="font-bold">#{order.id.slice(0, 8)} - {order.customer_name}</p><p className="text-sm text-stone-400">{new Date(order.created_at).toLocaleString()} - {order.delivery_method} - {order.payment_method}</p></div><strong className="text-xl text-red-200">{money.format(order.total)}</strong></div>
+    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div><p className="font-bold">#{order.id.slice(0, 8)} - {order.customer_name}</p><p className="text-sm font-medium text-[var(--muted)]">{new Date(order.created_at).toLocaleString()} - {order.delivery_method} - {order.payment_method}</p></div><strong className="text-xl text-[var(--tomato)]">{money.format(order.total)}</strong></div>
     <div className="mt-3 flex flex-wrap gap-2">{order.items.map((item) => <span className="badge" key={`${order.id}-${item.productName}`}>{item.productName} x{item.quantity}</span>)}</div>
     <div className="mt-4 flex items-center gap-3"><StockBadge status={order.status as never} label={order.status} />{isStaff && <select className="input max-w-56" value={order.status} onChange={(event) => setStatus(order.id, event.target.value)}>{["pendiente", "pagado", "preparando", "listo", "entregado", "cancelado"].map((status) => <option key={status}>{status}</option>)}</select>}</div>
   </article>)}</section>;
@@ -358,11 +361,11 @@ function ProductAdmin({ products, categories, api, reload }: { products: Product
 
 function Reports({ report }: { report: Report | null }) {
   if (!report) return <p>Cargando reportes...</p>;
-  return <section className="space-y-6"><h2 className="section-title">Reportes</h2><div className="grid gap-4 md:grid-cols-4">{[["Pedidos", report.orders], ["Ingresos", money.format(report.revenue)], ["Productos", report.products], ["Stock bajo", report.low_stock]].map(([label, value]) => <div className="card p-5" key={label}><p className="text-sm text-stone-400">{label}</p><p className="text-3xl font-black text-red-200">{value}</p></div>)}</div><div className="card p-5"><h3 className="mb-4 text-xl font-bold">Productos mas vendidos</h3><div className="space-y-3">{report.topProducts.map((item) => <div className="flex justify-between rounded-2xl bg-white/5 p-3" key={item.product_name}><span>{item.product_name} x{item.quantity}</span><strong>{money.format(item.revenue)}</strong></div>)}</div></div></section>;
+  return <section className="space-y-6"><h2 className="section-title">Reportes</h2><div className="grid gap-4 md:grid-cols-4">{[["Pedidos", report.orders], ["Ingresos", money.format(report.revenue)], ["Productos", report.products], ["Stock bajo", report.low_stock]].map(([label, value]) => <div className="card p-5" key={label}><p className="text-sm font-medium text-[var(--muted)]">{label}</p><p className="text-3xl font-black text-[var(--tomato)]">{value}</p></div>)}</div><div className="card p-5"><h3 className="mb-4 text-xl font-bold">Productos mas vendidos</h3><div className="space-y-3">{report.topProducts.map((item) => <div className="flex justify-between rounded-2xl bg-orange-50 p-3 ring-1 ring-orange-100" key={item.product_name}><span>{item.product_name} x{item.quantity}</span><strong>{money.format(item.revenue)}</strong></div>)}</div></div></section>;
 }
 
 function StockBadge({ status, label }: { status: string; label?: string }) {
-  const className = status === "agotado" || status === "cancelado" ? "bg-red-500/20 text-red-100" : status === "bajo_stock" || status === "pendiente" ? "bg-amber-500/20 text-amber-100" : "bg-emerald-500/20 text-emerald-100";
+  const className = status === "agotado" || status === "cancelado" ? "bg-red-100 text-red-800" : status === "bajo_stock" || status === "pendiente" ? "bg-yellow-100 text-yellow-800" : "bg-emerald-100 text-emerald-800";
   return <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${className}`}>{label || status.replace("_", " ")}</span>;
 }
 
