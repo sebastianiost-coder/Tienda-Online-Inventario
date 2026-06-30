@@ -93,6 +93,7 @@ export async function migrateAndSeed() {
     INSERT INTO categories (name, description)
     VALUES
       ('Milanesas', 'Milanesas de vacuno y cerdo listas para preparar'),
+      ('Milanesas congeladas', 'Milanesas congeladas Hoy Milanesas en formato de 1 kilo'),
       ('Hamburguesas', 'Hamburguesas artesanales por porcion'),
       ('Cortes', 'Cortes de vacuno y cerdo por kilo'),
       ('Embutidos', 'Chorizos, salchichas y preparados'),
@@ -111,7 +112,10 @@ export async function migrateAndSeed() {
       ('COR-001', 'Corte bifester (1kg)', 'Corte de vacuno para plancha, venta por kilo.', 'Cortes', 12990, 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=900&q=80', 22, 15),
       ('COR-002', 'Costilla de cerdo (1kg)', 'Costilla de cerdo fresca, ideal para horno o parrilla.', 'Cortes', 10990, 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80', 19, 15),
       ('EMB-001', 'Chorizo (1kg)', 'Chorizo artesanal por kilo.', 'Embutidos', 6990, 'https://images.unsplash.com/photo-1598514982901-ae62764ae75e?auto=format&fit=crop&w=900&q=80', 40, 25),
-      ('EMB-002', 'Salchicha (1kg)', 'Salchicha fresca para completos o parrilla.', 'Embutidos', 5990, 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=900&q=80', 28, 25)
+      ('EMB-002', 'Salchicha (1kg)', 'Salchicha fresca para completos o parrilla.', 'Embutidos', 5990, 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=900&q=80', 28, 25),
+      ('HMC-001', 'Milanesas de vacuno congeladas (1kg)', 'Receta argentina Hoy Milanesas. Formato congelado de 1 kilo, listo para freir, hornear o preparar en air fryer.', 'Milanesas congeladas', 15000, 'https://placehold.co/900x600/ffd234/24201d?text=Milanesas+Vacuno+1kg', 60, 15),
+      ('HMC-002', 'Milanesas de pollo congeladas (1kg)', 'Receta argentina Hoy Milanesas. Formato congelado de 1 kilo de pollo, liviano y practico para comidas familiares.', 'Milanesas congeladas', 12000, 'https://placehold.co/900x600/ffd234/24201d?text=Milanesas+Pollo+1kg', 60, 15),
+      ('HMC-003', 'Milanesas veggie congeladas (1kg)', 'Milanesas veggie congeladas Hoy Milanesas. Consulta por opciones vegetarianas y veganas disponibles.', 'Milanesas congeladas', 8000, 'https://placehold.co/900x600/ffd234/24201d?text=Milanesas+Veggie+1kg', 40, 10)
     ) AS p(code, name, description, category_name, price, image_url, stock, min_stock)
     JOIN categories c ON c.name = p.category_name
     ON CONFLICT (code) DO NOTHING;
