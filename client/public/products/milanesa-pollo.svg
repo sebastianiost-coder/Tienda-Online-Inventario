@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="title desc">
+  <title id="title">Milanesas de pollo</title>
+  <desc id="desc">Icono de pollo Hoy Milanesas para milanesas de pollo congeladas.</desc>
+  <rect width="900" height="600" rx="46" fill="#ffd234"/>
+  <path d="M-38 98c156 59 266 55 416-7 155-64 302-63 482 0" fill="none" stroke="#1496b3" stroke-width="14" opacity=".34"/>
+  <path d="M0 505c164-115 317-128 456-37 139 91 280 85 444-17" fill="none" stroke="#f05a24" stroke-width="22" opacity=".36"/>
+  <g transform="translate(270 52)">
+    <path d="M180 41c-45 46-45 99 0 155 45-56 45-109 0-155z" fill="#df2b49"/>
+    <path d="M63 422c-31 9-52-7-63-48V236C0 115 68 58 180 58s180 57 180 178v138c-11 41-32 57-63 48-24 45-60 45-86 0-17 24-45 24-62 0-26 45-62 45-86 0z" fill="#e7eef4"/>
+    <circle cx="106" cy="248" r="25" fill="#2b3035"/>
+    <circle cx="254" cy="248" r="25" fill="#2b3035"/>
+    <ellipse cx="180" cy="292" rx="104" ry="58" fill="#f7a226"/>
+    <ellipse cx="180" cy="307" rx="94" ry="31" fill="#ffb43a"/>
+    <path d="M164 393c-36 65-28 113 16 145 44-32 52-80 16-145z" fill="#df2b49"/>
+  </g>
+  <text x="50" y="548" fill="#24201d" font-family="Trebuchet MS, Arial, sans-serif" font-size="42" font-weight="900">POLLO 1 KG</text>
+</svg>

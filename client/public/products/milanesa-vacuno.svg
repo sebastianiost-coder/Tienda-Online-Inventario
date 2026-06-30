@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="title desc">
+  <title id="title">Milanesas de vacuno</title>
+  <desc id="desc">Icono de vaca Hoy Milanesas para milanesas de vacuno congeladas.</desc>
+  <rect width="900" height="600" rx="46" fill="#ffd234"/>
+  <path d="M0 0h900v600H0z" fill="#fff9e8" opacity=".18"/>
+  <path d="M0 88c122 34 216 28 337-17 115-42 225-47 357-1 81 28 141 30 206 15" fill="none" stroke="#f05a24" stroke-width="24" opacity=".45"/>
+  <path d="M45 493c112-102 229-128 351-78 147 60 244 30 345-84 42-47 88-77 159-86" fill="none" stroke="#1496b3" stroke-width="12" opacity=".35"/>
+  <g transform="translate(115 78)">
+    <path d="M117 213c-41-35-85-56-117-56 7 53 43 88 104 102" fill="#fff"/>
+    <path d="M456 213c41-35 85-56 117-56-7 53-43 88-104 102" fill="#fff"/>
+    <ellipse cx="286" cy="272" rx="219" ry="174" fill="#fff"/>
+    <path d="M113 170c48 41 107 34 157-11 52 49 121 63 196 35 27 45 39 92 35 142-48 1-88-16-119-49-41 38-91 50-151 36-44-10-81-31-118-68z" fill="#1f2327"/>
+    <path d="M91 332c41-14 72-2 94 31-27 35-63 47-106 35-14-24-10-46 12-66z" fill="#1f2327"/>
+    <circle cx="218" cy="249" r="43" fill="#fff"/>
+    <circle cx="368" cy="249" r="43" fill="#fff"/>
+    <circle cx="232" cy="252" r="14" fill="#080808"/>
+    <circle cx="352" cy="252" r="14" fill="#080808"/>
+    <ellipse cx="290" cy="386" rx="95" ry="67" fill="#ffaaa0"/>
+    <ellipse cx="259" cy="396" rx="12" ry="21" fill="#111"/>
+    <ellipse cx="323" cy="396" rx="12" ry="21" fill="#111"/>
+    <path d="M172 126 203 0l72 126z" fill="#2d3338"/>
+    <path d="M343 126 374 0l72 126z" fill="#2d3338"/>
+  </g>
+  <text x="50" y="548" fill="#24201d" font-family="Trebuchet MS, Arial, sans-serif" font-size="42" font-weight="900">VACUNO 1 KG</text>
+</svg>

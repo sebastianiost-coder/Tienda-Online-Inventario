@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="title desc">
+  <title id="title">Milanesas veggie</title>
+  <desc id="desc">Icono de hoja Hoy Milanesas para milanesas veggie congeladas.</desc>
+  <rect width="900" height="600" rx="46" fill="#ffd234"/>
+  <path d="M-65 474c117-108 224-137 320-87 86 44 153 27 242-51 105-93 229-101 403-29" fill="none" stroke="#f05a24" stroke-width="22" opacity=".46"/>
+  <path d="M-41 96c135-31 264-18 386 39 129 60 250 59 363-4 72-40 136-52 192-37" fill="none" stroke="#1496b3" stroke-width="13" opacity=".28"/>
+  <g transform="translate(140 83)">
+    <path d="M55 421C84 214 230 83 493 28c45-9 85-12 127-4-71 196-229 324-472 385-33 8-64 12-93 12z" fill="#2a9b5c"/>
+    <path d="M102 392C186 236 321 139 526 99 369 163 245 265 154 405z" fill="#ffd234"/>
+    <path d="M91 421C112 254 202 141 360 82 218 170 131 283 91 421z" fill="#137a4a"/>
+  </g>
+  <text x="50" y="548" fill="#24201d" font-family="Trebuchet MS, Arial, sans-serif" font-size="42" font-weight="900">VEGGIE 1 KG</text>
+</svg>
