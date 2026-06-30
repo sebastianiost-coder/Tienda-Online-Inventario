@@ -48,7 +48,7 @@ function App() {
   const [report, setReport] = useState<Report | null>(null);
   const [tab, setTab] = useState("catalogo");
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("Milanesas congeladas");
   const [message, setMessage] = useState("");
 
   const isStaff = user?.role === "admin" || user?.role === "vendedor";
@@ -338,6 +338,9 @@ function Orders({ orders, token, isStaff, api, reload }: { orders: Order[]; toke
 }
 
 function Inventory({ products, movements, api, reload }: { products: Product[]; movements: Movement[]; api: <T>(path: string, options?: RequestInit) => Promise<T>; reload: () => Promise<void> }) {
+  const totalUnits = products.reduce((sum, product) => sum + product.stock, 0);
+  const lowStockProducts = products.filter((product) => product.stock <= product.min_stock);
+
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -345,18 +348,75 @@ function Inventory({ products, movements, api, reload }: { products: Product[]; 
     event.currentTarget.reset();
     await reload();
   }
-  return <div className="grid gap-6 lg:grid-cols-[420px_1fr]"><form className="card space-y-4 p-5" onSubmit={submit}><h2 className="section-title">Movimiento de stock</h2><select className="input" name="productId">{products.map((product) => <option value={product.id} key={product.id}>{product.code} - {product.name}</option>)}</select><select className="input" name="type"><option value="entrada">Entrada</option><option value="salida">Salida</option><option value="ajuste">Ajuste a cantidad exacta</option></select><input className="input" name="quantity" type="number" min="0" required placeholder="Cantidad" /><input className="input" name="note" placeholder="Nota" /><button className="btn w-full">Registrar</button></form><section className="card overflow-hidden p-5"><h2 className="section-title">Ultimos movimientos</h2><div className="overflow-x-auto"><table className="table"><thead><tr><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Stock</th><th>Fecha</th></tr></thead><tbody>{movements.map((item) => <tr key={item.id}><td>{item.product_code} {item.product_name}</td><td>{item.type}</td><td>{item.quantity}</td><td>{item.previous_stock} {"->"} {item.new_stock}</td><td>{new Date(item.created_at).toLocaleString()}</td></tr>)}</tbody></table></div></section></div>;
+
+  return <div className="space-y-6">
+    <div className="grid gap-4 md:grid-cols-3">
+      <div className="card p-5"><p className="text-sm font-medium text-[var(--muted)]">Productos activos</p><p className="text-3xl font-black text-[var(--tomato)]">{products.length}</p></div>
+      <div className="card p-5"><p className="text-sm font-medium text-[var(--muted)]">Unidades en stock</p><p className="text-3xl font-black text-[var(--tomato)]">{totalUnits}</p></div>
+      <div className="card p-5"><p className="text-sm font-medium text-[var(--muted)]">Alertas bajo stock</p><p className="text-3xl font-black text-[var(--tomato)]">{lowStockProducts.length}</p></div>
+    </div>
+
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <form className="card space-y-4 p-5" onSubmit={submit}>
+        <h2 className="section-title">Movimiento de stock</h2>
+        <select className="input" name="productId">{products.map((product) => <option value={product.id} key={product.id}>{product.code} - {product.name}</option>)}</select>
+        <select className="input" name="type"><option value="entrada">Entrada</option><option value="salida">Salida</option><option value="ajuste">Ajuste a cantidad exacta</option></select>
+        <input className="input" name="quantity" type="number" min="0" required placeholder="Cantidad" />
+        <input className="input" name="note" placeholder="Nota" />
+        <button className="btn w-full">Registrar</button>
+      </form>
+
+      <section className="card overflow-hidden p-5">
+        <h2 className="section-title">Inventario actual</h2>
+        <div className="overflow-x-auto"><table className="table"><thead><tr><th>Codigo</th><th>Producto</th><th>Categoria</th><th>Stock</th><th>Minimo</th><th>Estado</th></tr></thead><tbody>{products.map((product) => <tr key={product.id}><td>{product.code}</td><td>{product.name}</td><td>{product.category_name}</td><td>{product.stock}</td><td>{product.min_stock}</td><td><StockBadge status={product.stock_status} /></td></tr>)}</tbody></table></div>
+      </section>
+    </div>
+
+    <section className="card overflow-hidden p-5">
+      <h2 className="section-title">Ultimos movimientos</h2>
+      {movements.length === 0 ? <p className="text-[var(--muted)]">Aun no hay movimientos registrados.</p> : <div className="overflow-x-auto"><table className="table"><thead><tr><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Stock</th><th>Fecha</th></tr></thead><tbody>{movements.map((item) => <tr key={item.id}><td>{item.product_code} {item.product_name}</td><td>{item.type}</td><td>{item.quantity}</td><td>{item.previous_stock} {"->"} {item.new_stock}</td><td>{new Date(item.created_at).toLocaleString()}</td></tr>)}</tbody></table></div>}
+    </section>
+  </div>;
 }
 
 function ProductAdmin({ products, categories, api, reload }: { products: Product[]; categories: Category[]; api: <T>(path: string, options?: RequestInit) => Promise<T>; reload: () => Promise<void> }) {
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    await api("/products", { method: "POST", body: JSON.stringify({ code: form.get("code"), name: form.get("name"), description: form.get("description"), categoryId: form.get("categoryId"), price: form.get("price"), imageUrl: form.get("imageUrl"), stock: form.get("stock"), minStock: form.get("minStock") }) });
+    const payload = { code: form.get("code"), name: form.get("name"), description: form.get("description"), categoryId: form.get("categoryId"), price: form.get("price"), imageUrl: form.get("imageUrl"), stock: form.get("stock"), minStock: form.get("minStock"), active: form.get("active") === "on" };
+    if (editingProduct) {
+      await api(`/products/${editingProduct.id}`, { method: "PUT", body: JSON.stringify(payload) });
+      setEditingProduct(null);
+    } else {
+      await api("/products", { method: "POST", body: JSON.stringify(payload) });
+    }
     event.currentTarget.reset();
     await reload();
   }
-  return <div className="grid gap-6 lg:grid-cols-[420px_1fr]"><form className="card space-y-4 p-5" onSubmit={submit}><h2 className="section-title">Nuevo producto</h2><input className="input" name="code" placeholder="Codigo" required /><input className="input" name="name" placeholder="Nombre" required /><textarea className="input" name="description" placeholder="Descripcion" /><select className="input" name="categoryId">{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select><input className="input" name="price" type="number" min="0" placeholder="Precio" required /><input className="input" name="stock" type="number" min="0" placeholder="Stock inicial" required /><input className="input" name="minStock" type="number" min="0" placeholder="Stock minimo" required /><input className="input" name="imageUrl" placeholder="URL imagen" /><button className="btn w-full">Crear producto</button></form><section className="card overflow-hidden p-5"><h2 className="section-title">Productos</h2><div className="overflow-x-auto"><table className="table"><thead><tr><th>Codigo</th><th>Producto</th><th>Categoria</th><th>Precio</th><th>Stock</th></tr></thead><tbody>{products.map((product) => <tr key={product.id}><td>{product.code}</td><td>{product.name}</td><td>{product.category_name}</td><td>{money.format(product.price)}</td><td>{product.stock}</td></tr>)}</tbody></table></div></section></div>;
+
+  return <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+    <form className="card space-y-4 p-5" onSubmit={submit} key={editingProduct?.id || "new-product"}>
+      <div className="flex items-center justify-between gap-3"><h2 className="section-title mb-0">{editingProduct ? "Editar producto" : "Nuevo producto"}</h2>{editingProduct && <button className="btn-secondary" type="button" onClick={() => setEditingProduct(null)}>Cancelar</button>}</div>
+      <input className="input" name="code" placeholder="Codigo" required defaultValue={editingProduct?.code || ""} />
+      <input className="input" name="name" placeholder="Nombre" required defaultValue={editingProduct?.name || ""} />
+      <textarea className="input" name="description" placeholder="Descripcion" defaultValue={editingProduct?.description || ""} />
+      <select className="input" name="categoryId" defaultValue={editingProduct?.category_id || categories[0]?.id}>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select>
+      <input className="input" name="price" type="number" min="0" placeholder="Precio" required defaultValue={editingProduct?.price || ""} />
+      {!editingProduct && <input className="input" name="stock" type="number" min="0" placeholder="Stock inicial" required />}
+      {editingProduct && <div className="rounded-2xl bg-orange-50 p-4 text-sm font-semibold text-[var(--muted)] ring-1 ring-orange-100">Stock actual: {editingProduct.stock}. Para cambiarlo usa el modulo Inventario.</div>}
+      <input className="input" name="minStock" type="number" min="0" placeholder="Stock minimo" required defaultValue={editingProduct?.min_stock || ""} />
+      <input className="input" name="imageUrl" placeholder="URL imagen" defaultValue={editingProduct?.image_url || ""} />
+      <label className="flex items-center gap-3 rounded-2xl bg-orange-50 p-4 font-bold ring-1 ring-orange-100"><input name="active" type="checkbox" defaultChecked={editingProduct?.active ?? true} /> Producto activo</label>
+      <button className="btn w-full">{editingProduct ? "Guardar cambios" : "Crear producto"}</button>
+    </form>
+
+    <section className="card overflow-hidden p-5">
+      <h2 className="section-title">Productos</h2>
+      <div className="overflow-x-auto"><table className="table"><thead><tr><th>Codigo</th><th>Producto</th><th>Categoria</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead><tbody>{products.map((product) => <tr key={product.id}><td>{product.code}</td><td>{product.name}</td><td>{product.category_name}</td><td>{money.format(product.price)}</td><td>{product.stock}</td><td><button className="btn-secondary" onClick={() => setEditingProduct(product)}>Editar</button></td></tr>)}</tbody></table></div>
+    </section>
+  </div>;
 }
 
 function Reports({ report }: { report: Report | null }) {
