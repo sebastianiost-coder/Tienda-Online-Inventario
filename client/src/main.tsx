@@ -34,6 +34,7 @@ type Order = {
 };
 type Movement = { id: string; product_name: string; product_code: string; type: string; quantity: number; previous_stock: number; new_stock: number; note?: string; created_at: string };
 type Report = { orders: number; revenue: number; products: number; low_stock: number; topProducts: { product_name: string; quantity: number; revenue: number }[] };
+type ProductPayload = { code: FormDataEntryValue | null; name: FormDataEntryValue | null; description: FormDataEntryValue | null; categoryId: FormDataEntryValue | null; price: FormDataEntryValue | null; imageUrl: FormDataEntryValue | null; stock: FormDataEntryValue | null; minStock: FormDataEntryValue | null; active: boolean };
 
 const money = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
 
@@ -242,7 +243,7 @@ function Catalog({ products, categories, search, setSearch, category, setCategor
 }
 
 function ProductDetailModal({ product, close, addToCart }: { product: Product; close: () => void; addToCart: (product: Product) => void }) {
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-orange-950/45 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="product-detail-title" onClick={close}>
+  return <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="product-detail-title" onClick={close}>
     <section className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-[var(--plate-line)] bg-white shadow-2xl shadow-orange-300/60" onClick={(event) => event.stopPropagation()}>
       <div className="grid md:grid-cols-[1.1fr_0.9fr]">
         <img className="h-72 w-full object-cover md:h-full" src={product.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80"} alt={product.name} />
@@ -269,6 +270,23 @@ function ProductDetailModal({ product, close, addToCart }: { product: Product; c
           <button className="btn w-full" disabled={product.stock <= 0} onClick={() => addToCart(product)}>{product.stock <= 0 ? "Producto agotado" : "Agregar al carrito"}</button>
         </div>
       </div>
+    </section>
+  </div>;
+}
+
+function Modal({ title, eyebrow, open, onClose, children, wide = false }: { title: string; eyebrow?: string; open: boolean; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
+  if (!open) return null;
+
+  return <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title" onMouseDown={onClose}>
+    <section className={`modal-panel ${wide ? "modal-panel-wide" : "modal-panel-compact"}`} onMouseDown={(event) => event.stopPropagation()}>
+      <div className="modal-header">
+        <div>
+          {eyebrow && <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--aqua)]">{eyebrow}</p>}
+          <h2 id="modal-title" className="text-2xl font-black tracking-tight text-[var(--ink)]">{title}</h2>
+        </div>
+        <button type="button" onClick={onClose} className="modal-close" aria-label="Cerrar formulario">x</button>
+      </div>
+      {children}
     </section>
   </div>;
 }
@@ -382,41 +400,74 @@ function Inventory({ products, movements, api, reload }: { products: Product[]; 
 function ProductAdmin({ products, categories, api, reload }: { products: Product[]; categories: Category[]; api: <T>(path: string, options?: RequestInit) => Promise<T>; reload: () => Promise<void> }) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const payload = { code: form.get("code"), name: form.get("name"), description: form.get("description"), categoryId: form.get("categoryId"), price: form.get("price"), imageUrl: form.get("imageUrl"), stock: form.get("stock"), minStock: form.get("minStock"), active: form.get("active") === "on" };
-    if (editingProduct) {
-      await api(`/products/${editingProduct.id}`, { method: "PUT", body: JSON.stringify(payload) });
+  async function saveProduct(payload: ProductPayload, product?: Product) {
+    if (product) {
+      await api(`/products/${product.id}`, { method: "PUT", body: JSON.stringify(payload) });
       setEditingProduct(null);
     } else {
       await api("/products", { method: "POST", body: JSON.stringify(payload) });
     }
-    event.currentTarget.reset();
     await reload();
   }
 
+  async function submitNewProduct(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    await saveProduct(productPayloadFromForm(form));
+    event.currentTarget.reset();
+  }
+
+  async function submitEditedProduct(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingProduct) return;
+    const form = new FormData(event.currentTarget);
+    await saveProduct(productPayloadFromForm(form), editingProduct);
+  }
+
   return <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
-    <form className="card space-y-4 p-5" onSubmit={submit} key={editingProduct?.id || "new-product"}>
-      <div className="flex items-center justify-between gap-3"><h2 className="section-title mb-0">{editingProduct ? "Editar producto" : "Nuevo producto"}</h2>{editingProduct && <button className="btn-secondary" type="button" onClick={() => setEditingProduct(null)}>Cancelar</button>}</div>
-      <input className="input" name="code" placeholder="Codigo" required defaultValue={editingProduct?.code || ""} />
-      <input className="input" name="name" placeholder="Nombre" required defaultValue={editingProduct?.name || ""} />
-      <textarea className="input" name="description" placeholder="Descripcion" defaultValue={editingProduct?.description || ""} />
-      <select className="input" name="categoryId" defaultValue={editingProduct?.category_id || categories[0]?.id}>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select>
-      <input className="input" name="price" type="number" min="0" placeholder="Precio" required defaultValue={editingProduct?.price || ""} />
-      {!editingProduct && <input className="input" name="stock" type="number" min="0" placeholder="Stock inicial" required />}
-      {editingProduct && <div className="rounded-2xl bg-orange-50 p-4 text-sm font-semibold text-[var(--muted)] ring-1 ring-orange-100">Stock actual: {editingProduct.stock}. Para cambiarlo usa el modulo Inventario.</div>}
-      <input className="input" name="minStock" type="number" min="0" placeholder="Stock minimo" required defaultValue={editingProduct?.min_stock || ""} />
-      <input className="input" name="imageUrl" placeholder="URL imagen" defaultValue={editingProduct?.image_url || ""} />
-      <label className="flex items-center gap-3 rounded-2xl bg-orange-50 p-4 font-bold ring-1 ring-orange-100"><input name="active" type="checkbox" defaultChecked={editingProduct?.active ?? true} /> Producto activo</label>
-      <button className="btn w-full">{editingProduct ? "Guardar cambios" : "Crear producto"}</button>
-    </form>
+    <section className="card p-5">
+      <div className="mb-4">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--aqua)]">Catalogo</p>
+        <h2 className="section-title mb-0">Nuevo producto</h2>
+      </div>
+      <ProductForm categories={categories} onSubmit={submitNewProduct} submitLabel="Crear producto" />
+    </section>
 
     <section className="card overflow-hidden p-5">
-      <h2 className="section-title">Productos</h2>
-      <div className="overflow-x-auto"><table className="table"><thead><tr><th>Codigo</th><th>Producto</th><th>Categoria</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead><tbody>{products.map((product) => <tr key={product.id}><td>{product.code}</td><td>{product.name}</td><td>{product.category_name}</td><td>{money.format(product.price)}</td><td>{product.stock}</td><td><button className="btn-secondary" onClick={() => setEditingProduct(product)}>Editar</button></td></tr>)}</tbody></table></div>
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--aqua)]">Administracion</p><h2 className="section-title mb-0">Productos</h2></div>
+        <div className="flex flex-wrap gap-2 text-sm font-bold text-[var(--muted)]"><span className="badge">{products.length} productos</span><span className="badge">{products.filter((product) => product.active).length} activos</span></div>
+      </div>
+      <div className="overflow-x-auto"><table className="table"><thead><tr><th>Codigo</th><th>Producto</th><th>Categoria</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>{products.map((product) => <tr key={product.id}><td>{product.code}</td><td>{product.name}</td><td>{product.category_name}</td><td>{money.format(product.price)}</td><td>{product.stock}</td><td><StockBadge status={product.active ? product.stock_status : "cancelado"} label={product.active ? product.stock_status.replace("_", " ") : "inactivo"} /></td><td><button className="btn-secondary" onClick={() => setEditingProduct(product)}>Editar</button></td></tr>)}</tbody></table></div>
     </section>
+
+    <Modal title="Editar producto" eyebrow="Productos" open={!!editingProduct} onClose={() => setEditingProduct(null)} wide>
+      {editingProduct && <ProductForm product={editingProduct} categories={categories} onSubmit={submitEditedProduct} onCancel={() => setEditingProduct(null)} submitLabel="Guardar cambios" />}
+    </Modal>
   </div>;
+}
+
+function productPayloadFromForm(form: FormData): ProductPayload {
+  return { code: form.get("code"), name: form.get("name"), description: form.get("description"), categoryId: form.get("categoryId"), price: form.get("price"), imageUrl: form.get("imageUrl"), stock: form.get("stock"), minStock: form.get("minStock"), active: form.get("active") === "on" };
+}
+
+function ProductForm({ product, categories, onSubmit, onCancel, submitLabel }: { product?: Product; categories: Category[]; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; onCancel?: () => void; submitLabel: string }) {
+  return <form className="grid gap-4 md:grid-cols-2" onSubmit={onSubmit} key={product?.id || "new-product"}>
+    <label className="grid gap-2 text-sm font-black text-[var(--muted)]">Codigo<input className="input" name="code" placeholder="HMC-004" required defaultValue={product?.code || ""} /></label>
+    <label className="grid gap-2 text-sm font-black text-[var(--muted)]">Nombre<input className="input" name="name" placeholder="Nombre del producto" required defaultValue={product?.name || ""} /></label>
+    <label className="grid gap-2 text-sm font-black text-[var(--muted)] md:col-span-2">Descripcion<textarea className="input min-h-28" name="description" placeholder="Descripcion comercial" defaultValue={product?.description || ""} /></label>
+    <label className="grid gap-2 text-sm font-black text-[var(--muted)]">Categoria<select className="input" name="categoryId" defaultValue={product?.category_id || categories[0]?.id}>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
+    <label className="grid gap-2 text-sm font-black text-[var(--muted)]">Precio<input className="input" name="price" type="number" min="0" placeholder="Precio" required defaultValue={product?.price || ""} /></label>
+    {!product && <label className="grid gap-2 text-sm font-black text-[var(--muted)]">Stock inicial<input className="input" name="stock" type="number" min="0" placeholder="Stock inicial" required /></label>}
+    {product && <div className="rounded-2xl bg-orange-50 p-4 text-sm font-semibold text-[var(--muted)] ring-1 ring-orange-100"><p className="font-black text-[var(--ink)]">Stock actual: {product.stock}</p><p>Para cambiarlo usa el modulo Inventario y deja trazabilidad del movimiento.</p></div>}
+    <label className="grid gap-2 text-sm font-black text-[var(--muted)]">Stock minimo<input className="input" name="minStock" type="number" min="0" placeholder="Stock minimo" required defaultValue={product?.min_stock || ""} /></label>
+    <label className="grid gap-2 text-sm font-black text-[var(--muted)] md:col-span-2">Imagen<input className="input" name="imageUrl" placeholder="/products/milanesa-vacuno.svg" defaultValue={product?.image_url || ""} /></label>
+    <label className="flex items-center gap-3 rounded-2xl bg-orange-50 p-4 font-bold ring-1 ring-orange-100 md:col-span-2"><input name="active" type="checkbox" defaultChecked={product?.active ?? true} /> Producto activo</label>
+    <div className="flex flex-col-reverse gap-2 pt-2 md:col-span-2 md:flex-row md:justify-end">
+      {onCancel && <button className="btn-secondary" type="button" onClick={onCancel}>Cancelar</button>}
+      <button className="btn" type="submit">{submitLabel}</button>
+    </div>
+  </form>;
 }
 
 function Reports({ report }: { report: Report | null }) {
